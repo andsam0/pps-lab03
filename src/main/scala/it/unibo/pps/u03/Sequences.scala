@@ -58,9 +58,9 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [], [] => []
      */
     def concat[A](s1: Sequence[A], s2: Sequence[A]): Sequence[A] = (s1, s2) match
+      case (Nil(), Nil()) => Nil()
       case (Cons(h1, t1), _) => Cons(h1, concat(t1, s2))
       case (Nil(), Cons(h2, t2)) => Cons(h2, concat(Nil(), t2))
-      case (Nil(), Nil()) => Nil()
 
     /*
      * Reverse the sequence
@@ -68,18 +68,19 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10] => [10]
      * E.g., [] => []
      */
-    def reverse[A](s: Sequence[A]): Sequence[A] = s match 
+    def reverse[A](s: Sequence[A]): Sequence[A] = s match
       case Nil() => Nil()
-      case Cons(h, Nil()) => Cons(h, Nil())
-      case Cons(h, t) => Cons(, )    
-    
+      case Cons(h, t) => concat(reverse(t), Cons(h, Nil()))
     /*
      * Map the elements of the sequence to a new sequence and flatten the result
      * E.g., [10, 20, 30], calling with mapper(v => [v, v + 1]) returns [10, 11, 20, 21, 30, 31]
      * E.g., [10, 20, 30], calling with mapper(v => [v]) returns [10, 20, 30]
      * E.g., [10, 20, 30], calling with mapper(v => Nil()) returns []
      */
-    def flatMap[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] = ???
+    def flatMap[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] = s match
+      case Nil() => Nil()
+      case Cons(h, t) => concat(mapper.apply(h), flatMap(t)(mapper))
+
 
     /*
      * Get the minimum element in the sequence
