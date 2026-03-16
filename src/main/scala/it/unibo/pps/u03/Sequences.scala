@@ -87,28 +87,43 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [30, 20, 10] => 10
      * E.g., [10, 1, 30] => 1
      */
-    def min(s: Sequence[Int]): Optional[Int] = ???
+    def min(s: Sequence[Int]): Optional[Int] = s match
+      case Nil() => Optional.Empty()
+      case Cons(h, t) => min(t) match {
+        case Optional.Empty() => Optional.Just(h)
+        case Optional.Just(m) => Optional.Just(math.min(h, m))
+      }
 
     /*
      * Get the elements at even indices
      * E.g., [10, 20, 30] => [10, 30]
      * E.g., [10, 20, 30, 40] => [10, 30]
      */
-    def evenIndices[A](s: Sequence[A]): Sequence[A] = ???
+    def evenIndices[A](s: Sequence[A]): Sequence[A] = s match
+      case Nil() => Nil()
+      case Cons(h, t) => Cons(h, evenIndices(skip(t)(1)))
 
     /*
      * Check if the sequence contains the element
      * E.g., [10, 20, 30] => true if elem is 20
      * E.g., [10, 20, 30] => false if elem is 40
      */
-    def contains[A](s: Sequence[A])(elem: A): Boolean = ???
+    @tailrec
+    def contains[A](s: Sequence[A])(elem: A): Boolean = (s, elem) match
+      case (Nil(), _) => false
+      case (Cons(h, t), e) => h match
+        case n if n == e => true
+        case _ => contains(t)(e)
 
     /*
      * Remove duplicates from the sequence
      * E.g., [10, 20, 10, 30] => [10, 20, 30]
      * E.g., [10, 20, 30] => [10, 20, 30]
      */
-    def distinct[A](s: Sequence[A]): Sequence[A] = ???
+    def distinct[A](s: Sequence[A]): Sequence[A] = s match
+      case Nil() => Nil()
+      case Cons(h, t) =>
+        Cons(h, filter(t)(n => n != h))
 
     /*
      * Group contiguous elements in the sequence
@@ -116,14 +131,28 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10, 20, 30] => [[10], [20], [30]]
      * E.g., [10, 20, 20, 30] => [[10], [20, 20], [30]]
      */
-    def group[A](s: Sequence[A]): Sequence[Sequence[A]] = ???
+    def group[A](s: Sequence[A]): Sequence[Sequence[A]] = s match
+      case Nil() => Nil()
+      case Cons(h, t) => group(t) match
+        case Nil() => Cons(Cons(h, Nil()), Nil())
+        case Cons(possiblySame, rest) => possiblySame match
+          case Cons(n, _) if n == h => Cons(Cons(h, possiblySame), rest)
+          case notMatch => Cons(Cons(h, Nil()), Cons(possiblySame, rest))
 
     /*
      * Partition the sequence into two sequences based on the predicate
      * E.g., [10, 20, 30] => ([10], [20, 30]) if pred is (_ < 20)
      * E.g., [11, 20, 31] => ([20], [11, 31]) if pred is (_ % 2 == 0)
      */
-    def partition[A](s: Sequence[A])(pred: A => Boolean): (Sequence[A], Sequence[A]) = ???
+    def partition[A](s: Sequence[A])(pred: A => Boolean): (Sequence[A], Sequence[A]) = s match
+      case Nil() => (Nil(), Nil())
+      case Cons(h, t) =>
+        val (okPred, noOKPred) = partition(t)(pred)
+        pred(h) match
+          case true => (Cons(h, okPred), noOKPred)
+          case false => (okPred, Cons(h,noOKPred))
+
+
 
 @main def trySequences =
   import Sequences.* 
