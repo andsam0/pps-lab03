@@ -16,11 +16,15 @@ object Task2 extends App {
 
   private def giveCourses1(s: Sequence[Person]) : Sequence[String] =
     map(filter(s)(!isStudent(_)))(t => getCourse(t))
+
+  private def giveCourses2(s: Sequence[Person]): Sequence[String] =
+    flatMapT(s) {
+      case Student(_, _) => Nil()
+      case Teacher(_, c) => Cons(c, Nil())
+    }
   
   val seq = Cons(Student("Mario", 2014), Cons(Teacher("Viroli", "PPS"), Cons(Teacher("Ricci", "PCD"), Nil())))
-  println(giveCourses1(seq))
-
-
+  println(giveCourses2(seq))
 
   @tailrec
   def foldLeft[A,B](s: Sequence[A])(default: B)(acc: (first: B, second: A) => B) : B = s match

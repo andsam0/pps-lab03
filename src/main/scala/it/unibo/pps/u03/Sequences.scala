@@ -108,7 +108,6 @@ object Sequences: // Essentially, generic linkedlists
       case Cons(h, t) => concat(mapper.apply(h), flatMap(t)(mapper))
 
     def flatMapT[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] =
-
       @tailrec
       def move(s: Sequence[B], currentAcc: Sequence[B]): Sequence[B] = s match
         case Nil() => currentAcc
