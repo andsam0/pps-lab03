@@ -51,6 +51,15 @@ object Sequences: // Essentially, generic linkedlists
       case (Nil(), _) => Nil()
       case (Cons(h1, t1), Cons(h2, t2)) => Cons((h1, h2), zip(t1, t2))
 
+    def zipT[A, B](first: Sequence[A], second: Sequence[B]): Sequence[(A, B)] =
+      @tailrec
+      def _zipT(s1: Sequence[A], s2: Sequence[B], acc: Sequence[(A, B)]): Sequence[(A, B)]= (s1, s2) match
+        case (_, Nil()) => reverseT(acc)
+        case (Nil(), _) => reverseT(acc)
+        case (Cons(h1, t1), Cons(h2, t2)) =>
+          _zipT(t1, t2, Cons((h1, h2), acc))
+
+      _zipT(first, second, Nil())
     /*
      * Concatenate two sequences
      * E.g., [10, 20, 30], [40, 50] => [10, 20, 30, 40, 50]
@@ -62,6 +71,16 @@ object Sequences: // Essentially, generic linkedlists
       case (Cons(h1, t1), _) => Cons(h1, concat(t1, s2))
       case (Nil(), Cons(h2, t2)) => Cons(h2, concat(Nil(), t2))
 
+    def concatT[A](s1: Sequence[A], s2: Sequence[A]): Sequence[A] =
+      @tailrec
+      def _concat(s1: Sequence[A], s2: Sequence[A], acc: Sequence[A]): Sequence[A] = (s1, s2) match
+        case (Nil(), Nil()) => reverseT(acc)
+        case (Cons(h1, t1), _) => _concat(t1, s2, Cons(h1, acc)) //Cons(h1, concat(t1, s2))
+        case (Nil(), Cons(h2, t2)) => _concat(Nil(), t2, Cons(h2, acc)) //Cons(h2, concat(Nil(), t2))
+
+      _concat(s1, s2, Nil())
+
+
     /*
      * Reverse the sequence
      * E.g., [10, 20, 30] => [30, 20, 10]
@@ -71,6 +90,13 @@ object Sequences: // Essentially, generic linkedlists
     def reverse[A](s: Sequence[A]): Sequence[A] = s match
       case Nil() => Nil()
       case Cons(h, t) => concat(reverse(t), Cons(h, Nil()))
+
+    def reverseT[A](s: Sequence[A]): Sequence[A] =
+      @tailrec
+      def _reverse(s: Sequence[A], acc: Sequence[A]): Sequence[A] = s match
+        case Nil() => acc
+        case Cons(h, t) => _reverse(t, Cons(h, acc)) //concat(reverse(t), Cons(h, Nil()))
+      _reverse(s, Nil())
     /*
      * Map the elements of the sequence to a new sequence and flatten the result
      * E.g., [10, 20, 30], calling with mapper(v => [v, v + 1]) returns [10, 11, 20, 21, 30, 31]
@@ -81,6 +107,22 @@ object Sequences: // Essentially, generic linkedlists
       case Nil() => Nil()
       case Cons(h, t) => concat(mapper.apply(h), flatMap(t)(mapper))
 
+    def flatMapT[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] =
+
+      @tailrec
+      def move(s: Sequence[B], currentAcc: Sequence[B]): Sequence[B] = s match
+        case Nil() => currentAcc
+        case Cons(h, t) => move(t, Cons(h, currentAcc))
+
+      @tailrec
+      def _flatMap(s: Sequence[A], acc: Sequence[B]): Sequence[B] = s match
+        case Nil() => reverseT(acc)
+        case Cons(h, t) =>
+          val applied = mapper(h)
+          val newAcc = move(applied, acc)
+          _flatMap(t, newAcc) //concat(mapper.apply(h), flatMap(t)(mapper))
+
+      _flatMap(s, Nil())
 
     /*
      * Get the minimum element in the sequence
