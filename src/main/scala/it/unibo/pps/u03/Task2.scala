@@ -22,16 +22,20 @@ object Task2 extends App {
       case Student(_, _) => Nil()
       case Teacher(_, c) => Cons(c, Nil())
     }
-  
-  val seq = Cons(Student("Mario", 2014), Cons(Teacher("Viroli", "PPS"), Cons(Teacher("Ricci", "PCD"), Nil())))
+
+  val seq = Cons(Student("Mario", 2014), Cons(Teacher("Viroli", "PPS"), Cons(Teacher("Ricci", "PCD"), Cons(Teacher("Riccio", "PCD"), Nil()))))
   println(giveCourses2(seq))
 
   @tailrec
-  def foldLeft[A,B](s: Sequence[A])(default: B)(acc: (first: B, second: A) => B) : B = s match
+  private def foldLeft[A,B](s: Sequence[A])(default: B)(acc: (first: B, second: A) => B) : B = s match
     case Nil() => default
     case Cons(h, t) => foldLeft(t)(acc.apply(default, h))(acc)
 
   val lst = Cons(3, Cons(7, Cons(1, Cons(5, Nil()))))
   println(foldLeft(lst)(0)(_ - _)) // -16
 
+  private def distinctCourses(s: Sequence[Person]): Int =
+    foldLeft(distinct(giveCourses2(s)))(0)((total, _) => total + 1)
+
+  println(distinctCourses(seq))
 }

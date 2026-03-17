@@ -164,7 +164,7 @@ object Sequences: // Essentially, generic linkedlists
     def distinct[A](s: Sequence[A]): Sequence[A] = s match
       case Nil() => Nil()
       case Cons(h, t) =>
-        Cons(h, filter(t)(n => n != h))
+        Cons(h, distinct(filter(t)(n => n != h)))
 
     /*
      * Group contiguous elements in the sequence
